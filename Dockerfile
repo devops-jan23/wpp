@@ -1,4 +1,4 @@
-FROM debian:11.6
+FROM debian:bullseye-slim
 WORKDIR /opt/wp
 CMD ["./demo"]
 RUN apt-get -y update

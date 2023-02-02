@@ -1,7 +1,7 @@
 version: "3"
 services:
   wpp:
-    image: wpp
+    build: .
+    image: wpp:latest
     ports:
      - "5000:5000"
-    command: ["./demo"]

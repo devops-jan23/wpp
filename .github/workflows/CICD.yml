@@ -107,7 +107,7 @@ jobs:
       - name: Run Docker container on ECS
         run: |
           aws ecs run-task \
-            --cluster cpp-cluster \
+            --cluster cpp-cluster-ec2 \
             --launch-type FARGATE \
             --task-definition cpp-docker-instance \
             --network-configuration awsvpcConfiguration={subnets=[subnet-0818b9561675ff47e]}

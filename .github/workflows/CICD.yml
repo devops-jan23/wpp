@@ -90,10 +90,10 @@ jobs:
               docker push ${{ env.ECR_REGISTRY }}:latest
           
 
-  run-on-ecs:
+  deploy-to-elastic-beanstalk:
     needs: push-to-ecr
     runs-on: ubuntu-latest
-
+    
     steps:
       - name: Set up AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
@@ -104,10 +104,26 @@ jobs:
         env:
           AWS_AUDIENCE: sts.amazonaws.com
 
-      - name: Run Docker container on ECS
+      - name: Download the latest Docker image
         run: |
-          aws ecs run-task \
-            --cluster cpp-cluster-ec2 \
-            --launch-type FARGATE \
-            --task-definition cpp-docker-instance \
-            --network-configuration awsvpcConfiguration={subnets=[subnet-0818b9561675ff47e]}
+          aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/q6y0k8g3
+          docker pull ${{ env.ECR_REGISTRY }}:latest
+
+      - name: Save Docker image as tar file
+        run: |
+          docker save -o image.tar ${{ env.ECR_REGISTRY }}:latest
+
+      - name: Upload Docker image to S3
+        run: |
+          aws s3 cp image.tar s3://elasticbeanstalk-eu-west-1-000887275976/docker-images/image.tar
+
+      - name: Deploy to Elastic Beanstalk
+        uses: einaregilsson/beanstalk-deploy@v21
+        with:
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          application_name: wpp
+          environment_name: Wpp-env
+          version_label: ${{ github.run_id }}
+          source_bundle: s3://elasticbeanstalk-eu-west-1-000887275976/docker-images/image.tar
+          region: eu-west-1

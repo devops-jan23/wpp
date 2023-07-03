@@ -81,7 +81,10 @@ jobs:
                 docker build -t ${{ env.ECR_REGISTRY }}:latest .
           
       - name: Login to Amazon ECR
-        run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS -p $(aws ecr get-login-password --region eu-west-1)
+        run: |
+              ECR_PASSWORD=$(aws ecr-public get-login-password --region us-east-1)
+              echo $ECR_PASSWORD | docker login --username AWS --password-stdin public.ecr.aws/q6y0k8g3
+              
       - name: Push Docker image to Amazon ECR
         run: |
               docker push ${{ env.ECR_REGISTRY }}:latest

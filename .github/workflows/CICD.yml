@@ -20,9 +20,6 @@ jobs:
 
       - name: Build project
         run: |
-          mkdir build
-          cd build
-          cmake ..
           make
 
       - name: Run linting
@@ -30,7 +27,6 @@ jobs:
 
       - name: Run tests
         run: |
-          cd build
           ctest --output-on-failure
 
   Build-Image:
@@ -74,8 +70,8 @@ jobs:
 
       - name: Tag and push Docker image to ECR
         run: |
-              docker tag wpp:latest public.ecr.aws/q6y0k8g3/hello-2048-lab:latest
-              docker push public.ecr.aws/q6y0k8g3/hello-2048-lab:latest
+          docker tag wpp:latest public.ecr.aws/q6y0k8g3/hello-2048-lab:latest
+          docker push public.ecr.aws/q6y0k8g3/hello-2048-lab:latest
 
   run-on-ecs:
     needs: push-to-ecr
